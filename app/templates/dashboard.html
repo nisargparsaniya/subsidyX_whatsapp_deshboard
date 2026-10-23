@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Executive Overview · SubsidyX Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/custom.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">SX</span>
+        <span class="brand-text">
+          <strong>SubsidyX</strong>
+          <span>Command center</span>
+        </span>
+      </div>
+
+      <nav class="nav" aria-label="Modules">
+        <div class="nav-label">Operations</div>
+
+        <button class="nav-item is-active" type="button" data-route="overview">
+          <span class="nav-num">01</span>
+          <span class="nav-glyph" aria-hidden="true">📊</span>
+          <span class="nav-text"><span class="nav-title">Executive Overview</span><span class="nav-sub">KPIs · charts · quick actions</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-route="inbox">
+          <span class="nav-num">02</span>
+          <span class="nav-glyph" aria-hidden="true">💬</span>
+          <span class="nav-text"><span class="nav-title">Live WhatsApp Inbox</span><span class="nav-sub">Threads · bot · dossier</span></span>
+          <span class="nav-count" id="navInboxCount" hidden>0</span>
+        </button>
+
+        <button class="nav-item" type="button" data-route="contacts">
+          <span class="nav-num">03</span>
+          <span class="nav-glyph" aria-hidden="true">👥</span>
+          <span class="nav-text"><span class="nav-title">HNI Contact Hub</span><span class="nav-sub">Import · segment · export</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-route="marketing">
+          <span class="nav-num">04</span>
+          <span class="nav-glyph" aria-hidden="true">🚀</span>
+          <span class="nav-text"><span class="nav-title">Templates &amp; Marketing</span><span class="nav-sub">Builder · bulk campaigns</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-route="chatbot">
+          <span class="nav-num">05</span>
+          <span class="nav-glyph" aria-hidden="true">🤖</span>
+          <span class="nav-text"><span class="nav-title">Chatbot Builder</span><span class="nav-sub">Rules · triggers · auto-tags</span></span>
+        </button>
+
+        <div class="nav-label" style="margin-top:14px">Administration</div>
+
+        <button class="nav-item" type="button" data-route="security" data-admin-only hidden>
+          <span class="nav-num">06</span>
+          <span class="nav-glyph" aria-hidden="true">🔐</span>
+          <span class="nav-text"><span class="nav-title">Admin &amp; Security</span><span class="nav-sub">Credentials · audit · cutover</span></span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-chip" id="userChip">
+          <span class="avatar" id="userAvatar">SX</span>
+          <span class="user-meta">
+            <strong id="userName">Loading…</strong>
+            <span id="userRole">—</span>
+          </span>
+        </div>
+        <button class="icon-btn is-plain" type="button" id="logoutBtn" title="Sign out" aria-label="Sign out" style="color:#cbd2ea">⏻</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn nav-toggle" type="button" id="navToggle" aria-label="Toggle navigation">☰</button>
+        <div class="topbar-title">
+          <span class="eyebrow" id="topEyebrow">Command center · IST</span>
+          <h1 id="topTitle">Executive Overview</h1>
+        </div>
+        <div class="topbar-meta">
+          <span class="clock mono" id="clock">—</span>
+          <span class="mode-pill" id="modePill" title="WhatsApp connection mode">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="modePillText">Connecting…</span>
+          </span>
+          <span class="avatar" id="topAvatar" aria-hidden="true">SX</span>
+        </div>
+      </header>
+
+      <section class="ledger-strip" aria-label="Live operating metrics">
+        <div class="ledger-cell">
+          <span class="ledger-pulse" aria-hidden="true"></span>
+          <span class="ledger-label">Feed</span>
+          <span class="ledger-value" style="font-size:10.5px;letter-spacing:0.06em">SYNCED</span>
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-label">HNI clients</span>
+          <span class="ledger-value is-loading" id="lgClients"></span>
+        </div>
+        <div class="ledger-cell is-signal">
+          <span class="ledger-label">Pipeline</span>
+          <span class="ledger-value is-loading" id="lgPipeline"></span>
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-label">Delivery</span>
+          <span class="ledger-value is-loading" id="lgDelivery"></span>
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-label">Open threads</span>
+          <span class="ledger-value is-loading" id="lgThreads"></span>
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-label">Bot replies</span>
+          <span class="ledger-value is-loading" id="lgBot"></span>
+        </div>
+      </section>
+
+      <main class="canvas" id="canvas">
+        <div class="view" id="view"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+  <div class="modal-root" id="modalRoot"></div>
+  <div class="print-root" id="printRoot"></div>
+</body>
+</html>

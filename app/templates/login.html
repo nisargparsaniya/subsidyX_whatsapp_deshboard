@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Staff sign-in · SubsidyX Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="login-body">
+
+  <aside class="login-story">
+    <div class="login-brand">
+      <span class="brand-mark">SX</span>
+      <span class="login-brand-text">
+        <strong>SubsidyX</strong>
+        <span>In-house command center</span>
+      </span>
+    </div>
+
+    <div class="login-hero">
+      <span class="kicker">● HNI WhatsApp desk · Gujarat</span>
+      <h1>Every HNI conversation,<br><em>one accountable ledger.</em></h1>
+      <p>
+        A private operations console for Admins, Chartered Accountants and Relationship Managers.
+        Import mobile contact books, run segmented WhatsApp campaigns, automate first replies and audit
+        every sign-in — with zero client-facing login.
+      </p>
+
+      <div class="login-metrics">
+        <div class="login-metric">
+          <div class="k">Modules</div>
+          <div class="v is-accent">06</div>
+        </div>
+        <div class="login-metric">
+          <div class="k">Access roles</div>
+          <div class="v">Admin · Staff</div>
+        </div>
+        <div class="login-metric">
+          <div class="k">Audit</div>
+          <div class="v">IP + Device</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-story-foot">
+      <span>SubsidyX Advisory</span>
+      <span class="dot-sep"></span>
+      <span>Ahmedabad · Surat · Rajkot</span>
+      <span class="dot-sep"></span>
+      <span>Internal use only</span>
+    </div>
+  </aside>
+
+  <main class="login-panel">
+    <div class="login-card">
+      <div class="login-card-head">
+        <span class="eyebrow-dark">Authorised staff only</span>
+        <h2>Sign in to the console</h2>
+        <p>Your role is detected automatically by the server, so the right modules unlock the moment you sign in.</p>
+      </div>
+
+      <form class="login-form" id="loginForm" autocomplete="on" novalidate>
+        <div class="login-error" id="loginError" role="alert">
+          <span aria-hidden="true">⚠</span>
+          <span id="loginErrorText">Invalid Employee ID or password.</span>
+        </div>
+
+        <div class="field">
+          <label for="username">Employee ID</label>
+          <input class="input mono-input" id="username" name="username" type="text" placeholder="e.g. nisarg" autocomplete="username" required autofocus>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input class="input" id="password" name="password" type="password" placeholder="••••••••••" autocomplete="current-password" required>
+            <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password" aria-pressed="false">👁</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block login-submit" id="loginSubmit" type="submit">Sign in securely →</button>
+      </form>
+
+      <div class="login-hint">
+        <div class="k">🔐 Seeded Super Admin logins</div>
+        <div class="hint-row"><span class="who">Nisarg Parsaniya</span><span class="mono">nisarg</span><span class="role">ADMIN</span></div>
+        <div class="hint-row"><span class="who">Gajendra Jain</span><span class="mono">gajendra</span><span class="role">ADMIN</span></div>
+        <div class="hint-row"><span class="who">CA Abhishek Jain</span><span class="mono">abhishek</span><span class="role">ADMIN</span></div>
+        <div class="hint-row"><span class="who">Rahul Desai</span><span class="mono">emp_rahul</span><span class="role is-emp">EMPLOYEE</span></div>
+        <div class="field-hint" style="margin-top:6px">Passwords: <span class="mono">Nisarg@2026</span>, <span class="mono">Gajendra@2026</span>, <span class="mono">Abhishek@2026</span>, <span class="mono">Rahul@2026</span>.</div>
+      </div>
+
+      <p class="login-foot-note">
+        HNI clients never access this dashboard. Five failed attempts lock the originating IP for 15 minutes,
+        and every attempt — successful or not — is written to the login audit trail.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var form = document.getElementById('loginForm');
+      var errorBox = document.getElementById('loginError');
+      var errorText = document.getElementById('loginErrorText');
+      var submit = document.getElementById('loginSubmit');
+      var usernameInput = document.getElementById('username');
+      var passwordInput = document.getElementById('password');
+      var toggle = document.getElementById('passwordToggle');
+
+      function showError(message) {
+        errorText.textContent = message;
+        errorBox.classList.add('is-visible');
+      }
+
+      function clearError() {
+        errorBox.classList.remove('is-visible');
+      }
+
+      toggle.addEventListener('click', function () {
+        var revealed = passwordInput.type === 'text';
+        passwordInput.type = revealed ? 'password' : 'text';
+        toggle.textContent = revealed ? '👁' : '🙈';
+        toggle.setAttribute('aria-pressed', revealed ? 'false' : 'true');
+        toggle.setAttribute('aria-label', revealed ? 'Show password' : 'Hide password');
+      });
+
+      [usernameInput, passwordInput].forEach(function (input) {
+        input.addEventListener('input', clearError);
+      });
+
+      // Already signed in? Skip the login screen.
+      fetch('/api/auth/me', { credentials: 'same-origin' })
+        .then(function (response) {
+          if (response.ok) window.location.replace('/dashboard');
+        })
+        .catch(function () {});
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearError();
+
+        var username = usernameInput.value.trim();
+        var password = passwordInput.value;
+
+        if (!username || !password) {
+          showError('Enter your Employee ID and password to continue.');
+          return;
+        }
+
+        submit.disabled = true;
+        submit.textContent = 'Verifying credentials…';
+
+        fetch('/api/auth/login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        })
+          .then(function (response) {
+            return response.json().catch(function () {
+              return {};
+            }).then(function (payload) {
+              return { ok: response.ok, status: response.status, payload: payload };
+            });
+          })
+          .then(function (result) {
+            if (result.ok) {
+              submit.textContent = 'Access granted — opening console…';
+              window.location.replace('/dashboard');
+              return;
+            }
+            var message = result.payload && result.payload.detail ? result.payload.detail : 'Sign-in failed. Please try again.';
+            if (Array.isArray(message)) {
+              message = message.map(function (item) { return item.msg; }).join(' · ');
+            }
+            showError(message);
+            passwordInput.value = '';
+            passwordInput.focus();
+            submit.disabled = false;
+            submit.textContent = 'Sign in securely →';
+          })
+          .catch(function () {
+            showError('Could not reach the server. Check your connection and try again.');
+            submit.disabled = false;
+            submit.textContent = 'Sign in securely →';
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
