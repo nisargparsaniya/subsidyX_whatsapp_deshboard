@@ -106,7 +106,7 @@ def reset_demo_mock(admin=Depends(require_admin), db: Session = Depends(get_db))
 
 
 @router.get("/threads")
-def threads(db: Session = Depends(get_db)):
+def threads(user=Depends(get_current_user), db: Session = Depends(get_db)):
     contacts = list(db.scalars(select(HniContact).order_by(HniContact.id)).all())
     messages = list(db.scalars(select(WhatsAppMessage).order_by(WhatsAppMessage.id.desc())).all())
 
@@ -137,6 +137,7 @@ def threads(db: Session = Depends(get_db)):
 def conversation(
     contact_id: int,
     limit: int = 200,
+    user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     contact = db.get(HniContact, contact_id)
@@ -154,7 +155,7 @@ def conversation(
 
 
 @router.post("/threads/{contact_id}/read")
-def mark_thread_read(contact_id: int, db: Session = Depends(get_db)):
+def mark_thread_read(contact_id: int, user=Depends(get_current_user), db: Session = Depends(get_db)):
     result = db.execute(
         update(WhatsAppMessage)
         .where(
