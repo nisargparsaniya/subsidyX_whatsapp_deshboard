@@ -1,4 +1,5 @@
-"""HNI contact book API: CRUD, mobile import/export and campaign segments."""
+from pathlib import Path
+import secrets
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -7,11 +8,17 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.contact import SECTORS, HniContact, next_inquiry_id
+from app.models.user import ADMIN, User
 from app.models.whatsapp_message import WhatsAppMessage
 from app.services import contact_io, whatsapp_engine
+from app.services.cache import get_cache, invalidate_cache_prefix, set_cache
 from app.services.security import get_current_user
+from app.services.tier_engine import compute_client_tier
 
 router = APIRouter(prefix="/api/contacts", tags=["Contacts"], dependencies=[Depends(get_current_user)])
+
+AVATARS_DIR = Path(__file__).resolve().parent.parent / "static" / "uploads" / "avatars"
+AVATARS_DIR.mkdir(parents=True, exist_ok=True)
 
 CONTACT_FIELDS = (
     "client_name",
@@ -30,6 +37,9 @@ CONTACT_FIELDS = (
     "tags",
     "opt_in_status",
     "assigned_ca",
+    "client_profile_type",
+    "avatar_url",
+    "avatar_source",
 )
 
 MEDIA_TYPES = {
@@ -54,6 +64,8 @@ class ContactCreate(BaseModel):
     term_loan_planned: str = "No"
     project_type: str = "New"
     estimated_subsidy_lakhs: float = 0.0
+    client_profile_type: str = "INDUSTRIALIST"
+    avatar_url: str = "/static/img/logo-mark.png"
     tags: str = ""
     opt_in_status: bool = True
     assigned_ca: str = ""
@@ -75,6 +87,8 @@ class ContactUpdate(BaseModel):
     term_loan_planned: str | None = None
     project_type: str | None = None
     estimated_subsidy_lakhs: float | None = None
+    client_profile_type: str | None = None
+    avatar_url: str | None = None
     tags: str | None = None
     opt_in_status: bool | None = None
     assigned_ca: str | None = None
@@ -95,6 +109,10 @@ def segments(db: Session = Depends(get_db)):
 
 @router.get("/stats")
 def stats(db: Session = Depends(get_db)):
+    cached = get_cache("contacts:stats")
+    if cached is not None:
+        return cached
+
     contacts = list(db.scalars(select(HniContact)).all())
     pipeline = round(sum(contact.estimated_subsidy_lakhs for contact in contacts), 2)
 
@@ -115,7 +133,7 @@ def stats(db: Session = Depends(get_db)):
         if contact.assigned_ca:
             cas[contact.assigned_ca] = cas.get(contact.assigned_ca, 0) + 1
 
-    return {
+    result = {
         "total_contacts": len(contacts),
         "opted_in": sum(1 for contact in contacts if contact.opt_in_status),
         "pipeline_lakhs": pipeline,
@@ -128,6 +146,8 @@ def stats(db: Session = Depends(get_db)):
         ],
         "by_ca": [{"assigned_ca": key, "count": value} for key, value in sorted(cas.items(), key=lambda item: item[1], reverse=True)],
     }
+    set_cache("contacts:stats", result, ttl_seconds=20)
+    return result
 
 
 @router.post("/import")
@@ -150,6 +170,7 @@ async def import_contacts(
         is_mock=whatsapp_engine.mock_active(db),
         auto_welcome=auto_welcome,
     )
+    invalidate_cache_prefix("contacts")
     result["filename"] = file.filename
     result["auto_welcome"] = auto_welcome
     result["message"] = (
@@ -192,10 +213,14 @@ def list_contacts(
     sector: str | None = None,
     district: str | None = None,
     enterprise_classification: str | None = None,
+    tier: str | None = None,
     tag: str | None = None,
     opt_in: bool | None = None,
-    limit: int = Query(default=100, ge=1, le=500),
-    offset: int = Query(default=0, ge=0),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=500),
+    limit: int | None = Query(default=None, ge=1, le=500),
+    offset: int | None = Query(default=None, ge=0),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     query = select(HniContact)
@@ -217,18 +242,30 @@ def list_contacts(
         query = query.where(HniContact.district == district)
     if enterprise_classification:
         query = query.where(HniContact.enterprise_classification == enterprise_classification)
+    if tier and tier.strip():
+        query = query.where(HniContact.client_tier == tier.strip().upper())
     if tag:
         query = query.where(HniContact.tags.ilike(f"%{tag}%"))
     if opt_in is not None:
         query = query.where(HniContact.opt_in_status.is_(opt_in))
 
     total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
-    contacts = list(db.scalars(query.order_by(HniContact.id.desc()).offset(offset).limit(limit)).all())
-    return {"total": total, "limit": limit, "offset": offset, "contacts": [contact.public() for contact in contacts]}
+    effective_size = limit if limit is not None else page_size
+    effective_offset = offset if offset is not None else (page - 1) * effective_size
+    contacts = list(db.scalars(query.order_by(HniContact.id.desc()).offset(effective_offset).limit(effective_size)).all())
+    is_admin = user.role == ADMIN
+    return {
+        "total": total,
+        "page": page,
+        "page_size": effective_size,
+        "limit": effective_size,
+        "offset": effective_offset,
+        "contacts": [contact.public(is_admin=is_admin) for contact in contacts],
+    }
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_contact(payload: ContactCreate, db: Session = Depends(get_db)):
+def create_contact(payload: ContactCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     record = payload.model_dump(exclude={"auto_welcome"})
     try:
         contact = contact_io.build_contact(record, is_mock=whatsapp_engine.mock_active(db))
@@ -243,21 +280,29 @@ def create_contact(payload: ContactCreate, db: Session = Depends(get_db)):
         )
 
     contact.inquiry_id = next_inquiry_id(db)
+    contact.client_profile_type = payload.client_profile_type or "INDUSTRIALIST"
+    contact.client_tier = compute_client_tier(
+        contact.client_profile_type,
+        contact.enterprise_classification,
+        contact.estimated_subsidy_lakhs,
+    )
     db.add(contact)
     db.commit()
     db.refresh(contact)
+    invalidate_cache_prefix("contacts")
 
+    is_admin = user.role == ADMIN
     welcome_sent = whatsapp_engine.send_welcome(db, [contact]) if payload.auto_welcome else 0
-    return {"message": f"{contact.client_name} added as {contact.inquiry_id}.", "contact": contact.public(), "welcome_sent": welcome_sent}
+    return {"message": f"{contact.client_name} added as {contact.inquiry_id}.", "contact": contact.public(is_admin=is_admin), "welcome_sent": welcome_sent}
 
 
 @router.get("/{contact_id}")
-def get_contact(contact_id: int, db: Session = Depends(get_db)):
-    return {"contact": _get_contact(db, contact_id).public()}
+def get_contact(contact_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return {"contact": _get_contact(db, contact_id).public(is_admin=user.role == ADMIN)}
 
 
 @router.patch("/{contact_id}")
-def update_contact(contact_id: int, payload: ContactUpdate, db: Session = Depends(get_db)):
+def update_contact(contact_id: int, payload: ContactUpdate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     contact = _get_contact(db, contact_id)
     merged = contact_io.record_for(contact)
     merged.update({key: value for key, value in payload.model_dump(exclude_unset=True).items() if value is not None})
@@ -273,10 +318,18 @@ def update_contact(contact_id: int, payload: ContactUpdate, db: Session = Depend
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="That WhatsApp number belongs to another HNI contact.")
 
     for field in CONTACT_FIELDS:
-        setattr(contact, field, getattr(validated, field))
+        if hasattr(validated, field):
+            setattr(contact, field, getattr(validated, field))
+
+    contact.client_tier = compute_client_tier(
+        contact.client_profile_type,
+        contact.enterprise_classification,
+        contact.estimated_subsidy_lakhs,
+    )
     db.commit()
     db.refresh(contact)
-    return {"message": f"{contact.client_name} updated.", "contact": contact.public()}
+    invalidate_cache_prefix("contacts")
+    return {"message": f"{contact.client_name} updated.", "contact": contact.public(is_admin=user.role == ADMIN)}
 
 
 @router.delete("/{contact_id}")
@@ -286,4 +339,80 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db)):
         db.delete(message)
     db.delete(contact)
     db.commit()
+    invalidate_cache_prefix("contacts")
+    invalidate_cache_prefix("whatsapp")
     return {"message": f"{contact.client_name} ({contact.inquiry_id}) removed from the HNI contact book."}
+
+
+# --------------------------------------------------------------------------- Contact Avatar Management
+
+
+class ContactWhatsAppAvatarPayload(BaseModel):
+    whatsapp_avatar_url: str = Field(min_length=1, max_length=500)
+
+
+@router.post("/{contact_id}/avatar-upload")
+async def upload_contact_avatar(
+    contact_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    contact = _get_contact(db, contact_id)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Image size exceeds 5MB limit.")
+    ext = ".png"
+    if contents.startswith(b"\x89PNG\r\n\x1a\n"):
+        ext = ".png"
+    elif contents.startswith(b"\xff\xd8\xff"):
+        ext = ".jpg"
+    elif contents.startswith(b"RIFF") and b"WEBP" in contents[:16]:
+        ext = ".webp"
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image file. Only PNG, JPEG, or WebP allowed.")
+
+    filename = f"contact_{contact.id}_{secrets.token_hex(6)}{ext}"
+    dest = AVATARS_DIR / filename
+    dest.write_bytes(contents)
+
+    contact.avatar_url = f"/static/uploads/avatars/{filename}"
+    contact.avatar_source = "GALLERY_UPLOAD"
+    db.commit()
+    db.refresh(contact)
+    invalidate_cache_prefix("contacts")
+    return {"status": "ok", "message": "Contact avatar uploaded.", "contact": contact.public(is_admin=user.role == ADMIN)}
+
+
+@router.post("/{contact_id}/avatar-whatsapp")
+def sync_contact_avatar_whatsapp(
+    contact_id: int,
+    payload: ContactWhatsAppAvatarPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    contact = _get_contact(db, contact_id)
+    url = payload.whatsapp_avatar_url.strip()
+    if not (url.startswith("http://") or url.startswith("https://") or url.startswith("/static/")):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image URL.")
+    contact.avatar_url = url
+    contact.avatar_source = "WHATSAPP_SYNC"
+    db.commit()
+    db.refresh(contact)
+    invalidate_cache_prefix("contacts")
+    return {"status": "ok", "message": "Contact avatar synced from WhatsApp.", "contact": contact.public(is_admin=user.role == ADMIN)}
+
+
+@router.delete("/{contact_id}/avatar")
+def reset_contact_avatar(
+    contact_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    contact = _get_contact(db, contact_id)
+    contact.avatar_url = "/static/img/logo-mark.png"
+    contact.avatar_source = "DEFAULT_LOGO"
+    db.commit()
+    db.refresh(contact)
+    invalidate_cache_prefix("contacts")
+    return {"status": "ok", "message": "Contact avatar reset to logo fallback.", "contact": contact.public(is_admin=user.role == ADMIN)}

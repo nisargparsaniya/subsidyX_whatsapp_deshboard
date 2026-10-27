@@ -36,6 +36,10 @@ class HniContact(Base):
     tags: Mapped[str] = mapped_column(String(255), default="")
     opt_in_status: Mapped[bool] = mapped_column(Boolean, default=True)
     assigned_ca: Mapped[str] = mapped_column(String(120), default="")
+    client_profile_type: Mapped[str] = mapped_column(String(40), default="INDUSTRIALIST", index=True)
+    client_tier: Mapped[str | None] = mapped_column(String(20), nullable=True, default=None, index=True)
+    avatar_url: Mapped[str] = mapped_column(String(500), default="/static/img/logo-mark.png")
+    avatar_source: Mapped[str] = mapped_column(String(40), default="DEFAULT_LOGO")
     is_mock: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=ist_now)
 
@@ -51,7 +55,7 @@ class HniContact(Base):
                 merged.append(name)
         self.tags = ", ".join(merged)[:255]
 
-    def public(self) -> dict:
+    def public(self, is_admin: bool = True) -> dict:
         return {
             "id": self.id,
             "inquiry_id": self.inquiry_id,
@@ -68,6 +72,10 @@ class HniContact(Base):
             "term_loan_planned": self.term_loan_planned,
             "project_type": self.project_type,
             "estimated_subsidy_lakhs": self.estimated_subsidy_lakhs,
+            "client_profile_type": self.client_profile_type or "INDUSTRIALIST",
+            "client_tier": self.client_tier if is_admin else None,
+            "avatar_url": self.avatar_url or "/static/img/logo-mark.png",
+            "avatar_source": self.avatar_source or "DEFAULT_LOGO",
             "tags": self.tags,
             "tag_list": self.tag_list,
             "opt_in_status": self.opt_in_status,

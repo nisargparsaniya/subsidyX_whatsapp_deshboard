@@ -187,7 +187,7 @@ def contacts_for_segment(db: Session, segment: str) -> list[HniContact]:
     segment = (segment or "ALL").strip()
     query = select(HniContact).where(HniContact.opt_in_status.is_(True))
     upper = segment.upper()
-    if upper and upper != "ALL":
+    if upper and upper not in ("ALL", "ALL OPTED-IN", "ALL OPTED-IN HNI CLIENTS"):
         if upper == "MSME":
             query = query.where(HniContact.enterprise_classification.ilike("MSME%"))
         elif upper.startswith("TAG:"):

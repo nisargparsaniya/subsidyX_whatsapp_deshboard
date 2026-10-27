@@ -200,7 +200,7 @@ SEED_TEMPLATES = (
         "template_name": "Welcome Onboarding Message",
         "category": "WELCOME",
         "language": "en_IN",
-        "header_text": "🙏 Welcome to SubsidyX",
+        "header_text": "Welcome to SubsidyX",
         "body_text": (
             "Hello {{client_name}},\n\n"
             "Thank you for connecting with SubsidyX. Your inquiry {{inquiry_id}} for {{company_name}} "
@@ -208,7 +208,7 @@ SEED_TEMPLATES = (
             "Our CA desk is reviewing an indicative subsidy benefit of {{subsidy_amount}} for your "
             "{{project_type}} project in {{district}}. A dedicated Chartered Accountant will "
             "reach out within 24 working hours.\n\n"
-            "Reply *MENU* anytime to explore Gujarat industrial subsidy schemes."
+            "Reply MENU anytime to explore Gujarat industrial subsidy schemes."
         ),
         "footer_text": "SubsidyX · Gujarat Industrial Subsidy Advisory",
         "buttons_json": '[{"type": "QUICK_REPLY", "text": "Check Eligibility"}, {"type": "QUICK_REPLY", "text": "Talk to CA"}]',
@@ -218,7 +218,7 @@ SEED_TEMPLATES = (
         "template_name": "Gujarat Industrial Policy Subsidy Alert",
         "category": "SUBSIDY_ALERT",
         "language": "en_IN",
-        "header_text": "📢 Gujarat Industrial Policy 2026 — Subsidy Window Open",
+        "header_text": "Gujarat Industrial Policy 2026 — Subsidy Window Open",
         "body_text": (
             "Dear {{client_name}},\n\n"
             "Under the latest Gujarat Industrial Policy, {{company_name}} is eligible for an estimated "
@@ -236,16 +236,16 @@ SEED_TEMPLATES = (
         "template_name": "CA Term Loan Document Checklist",
         "category": "CA_DOCUMENT_REQUEST",
         "language": "en_IN",
-        "header_text": "📄 Term Loan Documentation Checklist",
+        "header_text": "Term Loan Documentation Checklist",
         "body_text": (
             "Hello {{client_name}},\n\n"
             "To process the subsidy claim for {{company_name}} ({{inquiry_id}}), our CA {{assigned_ca}} "
             "needs these documents:\n\n"
-            "1️⃣ Term loan sanction letter\n"
-            "2️⃣ Udyam / MSME registration\n"
-            "3️⃣ GST returns — last 2 years\n"
-            "4️⃣ Project cost statement & machinery quotations\n"
-            "5️⃣ Board resolution for {{sector}} expansion\n\n"
+            "1. Term loan sanction letter\n"
+            "2. Udyam / MSME registration\n"
+            "3. GST returns — last 2 years\n"
+            "4. Project cost statement & machinery quotations\n"
+            "5. Board resolution for {{sector}} expansion\n\n"
             "Upload them here on WhatsApp and we will begin the appraisal immediately."
         ),
         "footer_text": "SubsidyX CA Desk · {{assigned_ca}}",
@@ -256,14 +256,14 @@ SEED_TEMPLATES = (
         "template_name": "Festival & Policy Update Broadcast",
         "category": "MARKETING",
         "language": "en_IN",
-        "header_text": "✨ SubsidyX Festive Greetings",
+        "header_text": "SubsidyX Festive Greetings",
         "body_text": (
             "Dear {{client_name}},\n\n"
-            "Warm festive greetings from the entire SubsidyX family! 🪔\n\n"
+            "Warm festive greetings from the entire SubsidyX family.\n\n"
             "As {{company_name}} plans its next {{sector}} milestone, remember that government subsidy "
             "files submitted this quarter are processed 2x faster. Your indicative benefit stands at "
             "{{subsidy_amount}}.\n\n"
-            "Reply *HELLO* and our team will re-validate your eligibility free of cost."
+            "Reply HELLO and our team will re-validate your eligibility free of cost."
         ),
         "footer_text": "Reply STOP to opt out of updates",
         "buttons_json": "",
@@ -273,7 +273,7 @@ SEED_TEMPLATES = (
         "template_name": "સ્વાગત સંદેશ (Gujarati Welcome)",
         "category": "WELCOME",
         "language": "gu_IN",
-        "header_text": "🙏 સબસિડીX માં આપનું સ્વાગત છે",
+        "header_text": "સબસિડીX માં આપનું સ્વાગત છે",
         "body_text": (
             "નમસ્તે {{client_name}},\n\n"
             "{{company_name}} ની {{sector}} પ્રોજેક્ટ માટે અમે તમારી ચકાસણી શરૂ કરી છે. અંદાજિત સબસિડી "
@@ -293,10 +293,10 @@ SEED_FLOWS = (
         "trigger_keywords": "",
         "response_type": TEXT,
         "response_content": (
-            "Namaste {{client_name}} 🙏\n\n"
+            "Namaste {{client_name}}.\n\n"
             "Welcome to SubsidyX. I am the SubsidyX Assistant and I can help with Gujarat industrial "
             "subsidy eligibility, term loan documentation and application status for {{company_name}}.\n\n"
-            "Reply with your sector — *Textile*, *IT*, *Pharma*, *Green Energy* — or type *SUBSIDY* to "
+            "Reply with your sector — Textile, IT, Pharma, Green Energy — or type SUBSIDY to "
             "check your eligibility."
         ),
         "auto_assign_sector": "",
@@ -308,12 +308,12 @@ SEED_FLOWS = (
         "trigger_keywords": "hi, hello, namaste, hey, menu, start",
         "response_type": INTERACTIVE_MENU,
         "response_content": (
-            "Welcome back {{client_name}} 👋\n\n"
+            "Welcome back {{client_name}}.\n\n"
             "Please choose an option:\n"
-            "1️⃣ Check subsidy eligibility\n"
-            "2️⃣ Term loan documentation\n"
-            "3️⃣ Application status ({{inquiry_id}})\n"
-            "4️⃣ Talk to a CA"
+            "1. Check subsidy eligibility\n"
+            "2. Term loan documentation\n"
+            "3. Application status ({{inquiry_id}})\n"
+            "4. Talk to a CA"
         ),
         "auto_assign_sector": "",
         "auto_assign_ca": "",

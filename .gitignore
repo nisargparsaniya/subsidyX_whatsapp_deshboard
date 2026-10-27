@@ -1,4 +1,4 @@
-﻿# Python & Virtual Env
+# Python & Virtual Env
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,3 +22,11 @@ exports/
 .DS_Store
 Thumbs.db
 *.log
+logs/
+.pytest_cache/
+node_modules/
+
+# Scratch & Temporary Folders
+opencode_phases/
+tmp*
+

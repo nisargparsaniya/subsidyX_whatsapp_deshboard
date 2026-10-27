@@ -1,6 +1,6 @@
 """Live WhatsApp inbox, manual composer, Meta Cloud API webhook and MOCK -> LIVE cutover."""
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select, update
@@ -33,6 +33,7 @@ from app.models.whatsapp_message import (
     WhatsAppMessage,
 )
 from app.services import contact_io, whatsapp_engine
+from app.services.cache import invalidate_cache_prefix
 from app.services.mock_seeder import purge_mock_data, seed_presentation_data
 from app.services.security import get_current_user, require_admin
 
@@ -46,6 +47,7 @@ class MetaCredentials(BaseModel):
     meta_waba_id: str = Field(min_length=5, max_length=64)
     meta_access_token: str = Field(min_length=20, max_length=1000)
     meta_verify_token: str | None = Field(default=None, max_length=120)
+    purge_mock: bool = True
 
 
 class SendPayload(BaseModel):
@@ -57,6 +59,9 @@ class SendPayload(BaseModel):
 @router.get("/mode")
 def mode(user=Depends(get_current_user), db: Session = Depends(get_db)):
     token = get_setting(db, META_ACCESS_TOKEN, "") or ""
+    from app.services.ai_adapter import is_ai_enabled
+    from app.models.system_setting import AI_PROVIDER_KEY, AI_MODEL_KEY
+
     return {
         "whatsapp_mode": get_whatsapp_mode(db),
         "is_mock": whatsapp_engine.mock_active(db),
@@ -68,21 +73,28 @@ def mode(user=Depends(get_current_user), db: Session = Depends(get_db)):
             "access_token": mask_secret(token),
             "verify_token": get_setting(db, META_VERIFY_TOKEN) or settings.META_VERIFY_TOKEN,
         },
+        "ai": {
+            "enabled": is_ai_enabled(db),
+            "provider": get_setting(db, AI_PROVIDER_KEY, settings.AI_PROVIDER),
+            "model": get_setting(db, AI_MODEL_KEY, settings.AI_MODEL),
+        },
     }
 
 
 @router.post("/connect-meta-api")
 def connect_meta_api(payload: MetaCredentials, admin=Depends(require_admin), db: Session = Depends(get_db)):
-    """Purge every presentation row and switch the platform permanently to LIVE."""
-    purged = purge_mock_data(db)
+    """Switch the platform to LIVE mode, with safe mock purge or isolation."""
+    purged = purge_mock_data(db) if payload.purge_mock else {}
     set_setting(db, META_PHONE_NUMBER_ID, payload.meta_phone_number_id.strip(), admin.username)
     set_setting(db, META_WABA_ID, payload.meta_waba_id.strip(), admin.username)
     set_setting(db, META_ACCESS_TOKEN, payload.meta_access_token.strip(), admin.username)
     set_setting(db, META_VERIFY_TOKEN, (payload.meta_verify_token or settings.META_VERIFY_TOKEN).strip(), admin.username)
     set_whatsapp_mode(db, LIVE, admin.username)
+    invalidate_cache_prefix("whatsapp")
+    invalidate_cache_prefix("contacts")
     return {
         "message": (
-            "Official Meta WhatsApp Cloud API connected. All presentation mock rows were purged — "
+            "Official Meta WhatsApp Cloud API connected. Presentation mock rows were purged — "
             "the command center is now 100% LIVE."
         ),
         "whatsapp_mode": LIVE,
@@ -97,6 +109,8 @@ def reset_demo_mock(admin=Depends(require_admin), db: Session = Depends(get_db))
     purged = purge_mock_data(db)
     set_whatsapp_mode(db, MOCK, admin.username)
     seeded = seed_presentation_data(db, force=True)
+    invalidate_cache_prefix("whatsapp")
+    invalidate_cache_prefix("contacts")
     return {
         "message": "Presentation mode restored — Gujarat HNI contacts, templates, campaigns and chatbot threads re-seeded.",
         "whatsapp_mode": get_whatsapp_mode(db),
@@ -106,7 +120,12 @@ def reset_demo_mock(admin=Depends(require_admin), db: Session = Depends(get_db))
 
 
 @router.get("/threads")
-def threads(user=Depends(get_current_user), db: Session = Depends(get_db)):
+def threads(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     contacts = list(db.scalars(select(HniContact).order_by(HniContact.id)).all())
     messages = list(db.scalars(select(WhatsAppMessage).order_by(WhatsAppMessage.id.desc())).all())
 
@@ -117,19 +136,25 @@ def threads(user=Depends(get_current_user), db: Session = Depends(get_db)):
         if message.direction == INBOUND and message.status == RECEIVED:
             unread[message.contact_id] = unread.get(message.contact_id, 0) + 1
 
+    is_admin = getattr(user, "role", "") == "ADMIN"
     feed = [
         {
-            "contact": contact.public(),
+            "contact": contact.public(is_admin=is_admin),
             "last_message": latest[contact.id].public() if contact.id in latest else None,
             "unread": unread.get(contact.id, 0),
         }
         for contact in contacts
     ]
     feed.sort(key=lambda item: item["last_message"]["created_at"] if item["last_message"] else "", reverse=True)
+    total = len(feed)
+    offset = (page - 1) * page_size
+    paged = feed[offset : offset + page_size]
     return {
-        "total": len(feed),
+        "total": total,
+        "page": page,
+        "page_size": page_size,
         "unread_total": sum(unread.values()),
-        "threads": feed,
+        "threads": paged,
     }
 
 
@@ -143,6 +168,7 @@ def conversation(
     contact = db.get(HniContact, contact_id)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="HNI contact not found.")
+    is_admin = getattr(user, "role", "") == "ADMIN"
     messages = list(
         db.scalars(
             select(WhatsAppMessage)
@@ -151,7 +177,7 @@ def conversation(
             .limit(limit)
         ).all()
     )
-    return {"contact": contact.public(), "messages": [message.public() for message in reversed(messages)]}
+    return {"contact": contact.public(is_admin=is_admin), "messages": [message.public() for message in reversed(messages)]}
 
 
 @router.post("/threads/{contact_id}/read")
@@ -184,6 +210,7 @@ def send_message(payload: SendPayload, user=Depends(get_current_user), db: Sessi
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Type a message or pick a template first.")
 
     message = whatsapp_engine.manual_reply(db, contact, payload.body.strip(), template=template)
+    invalidate_cache_prefix("whatsapp")
     return {"message": f"Message queued for {contact.client_name}.", "sent_by": user.username, "chat_message": message.public()}
 
 

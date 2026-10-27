@@ -8,91 +8,165 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/custom.css">
+  <link rel="stylesheet" href="/static/css/custom.css?v=20261027_v4">
+  <link rel="icon" type="image/png" href="/static/img/logo-mark.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
-  <script src="/static/js/app.js" defer></script>
+  <script src="/static/js/app.js?v=20261027_v4" defer></script>
 </head>
 <body>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <span class="brand-mark">SX</span>
-        <span class="brand-text">
-          <strong>SubsidyX</strong>
-          <span>Command center</span>
-        </span>
+        <a href="#overview" data-view="overview" data-section="overview" onclick="window.switchDashboardModule('overview', event)" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+          <img src="/static/img/logo-mark.png" alt="SubsidyX" class="brand-mark-img" style="height:32px; width:32px; object-fit:contain;">
+          <div class="brand-text">
+            <strong>SubsidyX</strong>
+            <span>Command Center</span>
+          </div>
+        </a>
       </div>
-
       <nav class="nav" aria-label="Modules">
         <div class="nav-label">Operations</div>
 
-        <button class="nav-item is-active" type="button" data-route="overview">
-          <span class="nav-num">01</span>
-          <span class="nav-glyph" aria-hidden="true">📊</span>
-          <span class="nav-text"><span class="nav-title">Executive Overview</span><span class="nav-sub">KPIs · charts · quick actions</span></span>
+        <button class="nav-item is-active active" type="button" data-view="overview" data-section="overview" data-route="overview" onclick="window.switchDashboardModule('overview', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Executive Overview</span><span class="nav-sub">KPIs · charts · pipeline</span></span>
         </button>
 
-        <button class="nav-item" type="button" data-route="inbox">
-          <span class="nav-num">02</span>
-          <span class="nav-glyph" aria-hidden="true">💬</span>
-          <span class="nav-text"><span class="nav-title">Live WhatsApp Inbox</span><span class="nav-sub">Threads · bot · dossier</span></span>
+        <button class="nav-item" type="button" data-view="inbox" data-section="inbox" data-route="inbox" onclick="window.switchDashboardModule('inbox', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Live WhatsApp Inbox</span><span class="nav-sub">Threads · rules · AI draft</span></span>
           <span class="nav-count" id="navInboxCount" hidden>0</span>
         </button>
 
-        <button class="nav-item" type="button" data-route="contacts">
-          <span class="nav-num">03</span>
-          <span class="nav-glyph" aria-hidden="true">👥</span>
+        <button class="nav-item" type="button" data-view="contacts" data-section="contacts" data-route="contacts" onclick="window.switchDashboardModule('contacts', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
           <span class="nav-text"><span class="nav-title">HNI Contact Hub</span><span class="nav-sub">Import · segment · export</span></span>
         </button>
 
-        <button class="nav-item" type="button" data-route="marketing">
-          <span class="nav-num">04</span>
-          <span class="nav-glyph" aria-hidden="true">🚀</span>
-          <span class="nav-text"><span class="nav-title">Templates &amp; Marketing</span><span class="nav-sub">Builder · bulk campaigns</span></span>
+        <button class="nav-item" type="button" data-view="ca-network" data-section="ca-network" data-route="ca-network" onclick="window.switchDashboardModule('ca-network', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">CA &amp; Associates Network</span><span class="nav-sub">Partners · firms · referrals</span></span>
         </button>
 
-        <button class="nav-item" type="button" data-route="chatbot">
-          <span class="nav-num">05</span>
-          <span class="nav-glyph" aria-hidden="true">🤖</span>
-          <span class="nav-text"><span class="nav-title">Chatbot Builder</span><span class="nav-sub">Rules · triggers · auto-tags</span></span>
+        <button class="nav-item" type="button" data-view="client-lists" data-section="client-lists" data-route="client-lists" onclick="window.switchDashboardModule('client-lists', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Client Lists</span><span class="nav-sub">Audience categorization</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-view="leads" data-section="leads" data-route="leads" onclick="window.switchDashboardModule('leads', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Omnichannel CRM</span><span class="nav-sub">IG · FB · Google Forms</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-view="campaigns" data-section="campaigns" data-route="campaigns" onclick="window.switchDashboardModule('campaigns', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Campaigns &amp; Scheduler</span><span class="nav-sub">Bulk &amp; scheduled WhatsApp</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-view="channels" data-section="channels" data-route="channels" data-admin-only hidden onclick="window.switchDashboardModule('channels', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Ad &amp; Form Channels</span><span class="nav-sub">Instagram · FB · Google Forms</span></span>
+        </button>
+
+        <button class="nav-item" type="button" data-view="chatbot" data-section="chatbot" data-route="chatbot" onclick="window.switchDashboardModule('chatbot', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Chatbot Builder</span><span class="nav-sub">Rules · triggers · AI draft</span></span>
         </button>
 
         <div class="nav-label" style="margin-top:14px">Administration</div>
 
-        <button class="nav-item" type="button" data-route="security" data-admin-only hidden>
-          <span class="nav-num">06</span>
-          <span class="nav-glyph" aria-hidden="true">🔐</span>
-          <span class="nav-text"><span class="nav-title">Admin &amp; Security</span><span class="nav-sub">Credentials · audit · cutover</span></span>
+        <button class="nav-item" type="button" data-view="admin" data-section="admin" data-route="admin" data-admin-only hidden onclick="window.switchDashboardModule('admin', event)">
+          <span class="nav-glyph" aria-hidden="true">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <span class="nav-text"><span class="nav-title">Admin &amp; Security</span><span class="nav-sub">Staff · audit · cutover</span></span>
         </button>
       </nav>
 
-      <div class="sidebar-foot">
-        <div class="user-chip" id="userChip">
-          <span class="avatar" id="userAvatar">SX</span>
-          <span class="user-meta">
-            <strong id="userName">Loading…</strong>
-            <span id="userRole">—</span>
-          </span>
-        </div>
-        <button class="icon-btn is-plain" type="button" id="logoutBtn" title="Sign out" aria-label="Sign out" style="color:#cbd2ea">⏻</button>
+      <div class="sidebar-foot" style="display:flex; justify-content:flex-end; padding:12px 16px;">
+        <button class="icon-btn is-plain" type="button" id="logoutBtn" title="Sign out" aria-label="Sign out" style="color:#cbd2ea; display:inline-flex; align-items:center; justify-content:center;">
+          <svg class="icon-svg" style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
       </div>
     </aside>
 
     <div class="main">
       <header class="topbar">
-        <button class="icon-btn nav-toggle" type="button" id="navToggle" aria-label="Toggle navigation">☰</button>
+        <div class="topbar-left-cluster">
+          <button class="icon-btn nav-toggle" type="button" id="sidebar-toggle" aria-label="Toggle navigation">
+            <svg class="icon-svg" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <a href="#overview" class="topbar-brand" data-view="overview" onclick="window.switchDashboardModule('overview', event)" title="SubsidyX">
+            <img src="/static/img/logo-mark.png" alt="SubsidyX" class="topbar-logo-mark" />
+          </a>
+        </div>
+
         <div class="topbar-title">
           <span class="eyebrow" id="topEyebrow">Command center · IST</span>
           <h1 id="topTitle">Executive Overview</h1>
         </div>
+
         <div class="topbar-meta">
-          <span class="clock mono" id="clock">—</span>
-          <span class="mode-pill" id="modePill" title="WhatsApp connection mode">
-            <span class="dot" aria-hidden="true"></span>
-            <span id="modePillText">Connecting…</span>
-          </span>
-          <span class="avatar" id="topAvatar" aria-hidden="true">SX</span>
+          <div class="topbar-clock-stack sx-datetime-stack" id="clock">
+            <span class="topbar-clock-time sx-time-top" id="clockTime">--:--:-- --</span>
+            <span class="topbar-clock-date sx-date-bottom" id="clockDate">-- --- ----</span>
+          </div>
+
+          <div class="user-menu-wrapper" id="userMenuWrapper">
+            <button class="user-menu-trigger" id="userMenuTrigger" type="button" aria-haspopup="true" aria-expanded="false" title="Account Menu">
+              <img src="/static/img/logo-mark.png" alt="Avatar" class="user-menu-avatar" id="topAvatarImg" onerror="this.onerror=null;this.src='/static/img/logo-mark.png';">
+              <div class="user-menu-info">
+                <span class="user-menu-name" id="topUserName">Loading…</span>
+                <span class="user-menu-role is-admin" id="topUserRole">SUPER ADMIN</span>
+              </div>
+              <svg class="icon-svg user-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="user-dropdown-menu" id="userDropdownMenu" hidden>
+              <div class="dropdown-header">
+                <strong id="dropdownUserFull">Admin User</strong>
+                <span id="dropdownUserRole">SUPER ADMIN</span>
+              </div>
+              <button class="dropdown-item" type="button" id="menuEditProfile">
+                <svg class="icon-svg" style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>My Profile &amp; Avatar</span>
+              </button>
+              <button class="dropdown-item" type="button" id="menuSecurityVault" data-admin-only>
+                <svg class="icon-svg" style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>Security &amp; Login Audit</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item is-danger" type="button" id="menuSignOut">
+                <svg class="icon-svg" style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -125,7 +199,17 @@
       </section>
 
       <main class="canvas" id="canvas">
-        <div class="view" id="view"></div>
+        <section id="view-overview" class="view-panel" data-view-panel="overview"></section>
+        <section id="view-inbox" class="view-panel" data-view-panel="inbox" style="display:none;"></section>
+        <section id="view-contacts" class="view-panel" data-view-panel="contacts" style="display:none;"></section>
+        <section id="view-ca-network" class="view-panel" data-view-panel="ca-network" style="display:none;"></section>
+        <section id="view-client-lists" class="view-panel" data-view-panel="client-lists" style="display:none;"></section>
+        <section id="view-leads" class="view-panel" data-view-panel="leads" style="display:none;"></section>
+        <section id="view-campaigns" class="view-panel" data-view-panel="campaigns" style="display:none;"></section>
+        <section id="view-channels" class="view-panel" data-view-panel="channels" style="display:none;"></section>
+        <section id="view-chatbot" class="view-panel" data-view-panel="chatbot" style="display:none;"></section>
+        <section id="view-admin" class="view-panel" data-view-panel="admin" style="display:none;"></section>
+        <div class="view" id="view" style="display:none;"></div>
       </main>
     </div>
   </div>

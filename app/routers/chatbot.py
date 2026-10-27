@@ -166,4 +166,45 @@ def simulate_inbound(payload: SimulateInbound, db: Session = Depends(get_db)):
             detail="Pick an HNI contact thread or pass a whatsapp_number to simulate an inbound message.",
         )
 
-    return whatsapp_engine.handle_inbound(db, contact, payload.message)
+    res = whatsapp_engine.handle_inbound(db, contact, payload.message)
+    # Include an optional AI draft proposal for staff review if enabled or on unmatched intent
+    from app.services.ai_adapter import generate_staff_draft
+    res["ai_draft"] = generate_staff_draft(contact, payload.message, db=db)
+    return res
+
+
+class DraftRequest(BaseModel):
+    contact_id: int
+    inbound_text: str = Field(min_length=1, max_length=1000)
+
+
+class ApproveDraftRequest(BaseModel):
+    contact_id: int
+    approved_text: str = Field(min_length=1, max_length=4000)
+
+
+@router.post("/draft-reply")
+def draft_reply(payload: DraftRequest, db: Session = Depends(get_db)):
+    """Generate an AI/rules candidate draft for staff review & approval (never auto-sent)."""
+    contact = db.get(HniContact, payload.contact_id)
+    if contact is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="HNI contact not found.")
+    from app.services.ai_adapter import generate_staff_draft
+
+    draft = generate_staff_draft(contact, payload.inbound_text, db=db)
+    return {"contact": contact.public(), "draft": draft}
+
+
+@router.post("/approve-draft")
+def approve_draft(payload: ApproveDraftRequest, user=Depends(get_current_user), db: Session = Depends(get_db)):
+    """Explicit staff approval of an AI or template draft, dispatching to WhatsApp."""
+    contact = db.get(HniContact, payload.contact_id)
+    if contact is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="HNI contact not found.")
+    message = whatsapp_engine.manual_reply(db, contact, payload.approved_text.strip())
+    return {
+        "message": f"Approved draft sent to {contact.client_name}.",
+        "approved_by": user.username,
+        "chat_message": message.public(),
+    }
+

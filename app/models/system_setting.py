@@ -18,7 +18,14 @@ META_WABA_ID = "meta_waba_id"
 META_ACCESS_TOKEN = "meta_access_token"
 META_VERIFY_TOKEN = "meta_verify_token"
 
-CREDENTIAL_KEYS = (META_PHONE_NUMBER_ID, META_WABA_ID, META_ACCESS_TOKEN)
+AI_ENABLED_KEY = "ai_enabled"
+AI_PROVIDER_KEY = "ai_provider"
+AI_API_BASE_KEY = "ai_api_base"
+AI_API_KEY_KEY = "ai_api_key"
+AI_MODEL_KEY = "ai_model"
+
+CREDENTIAL_KEYS = (META_PHONE_NUMBER_ID, META_WABA_ID, META_ACCESS_TOKEN, AI_API_KEY_KEY)
+
 
 
 class SystemSetting(Base):

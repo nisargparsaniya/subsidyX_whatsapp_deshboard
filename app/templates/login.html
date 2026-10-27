@@ -4,117 +4,493 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Staff sign-in · SubsidyX Command Center</title>
+  <title>Sign In · SubsidyX</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/custom.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/img/logo-mark.png">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.institutional-login-body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 0%, #292750 0%, #1D1C41 55%, #0D120F 100%);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #1a1d20;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .login-fixed-brand {
+      position: fixed;
+      top: 24px;
+      left: 32px;
+      z-index: 50;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+    .login-fixed-brand:hover {
+      opacity: 0.88;
+    }
+    .login-fixed-brand img {
+      height: 32px;
+      width: auto;
+      max-width: 170px;
+      object-fit: contain;
+      display: block;
+    }
+
+
+    .institutional-login-wrapper {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    .institutional-login-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 40px rgba(13, 18, 15, 0.35);
+      width: 100%;
+    }
+
+    .institutional-card-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-mark-lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand-mark-lockup img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+
+    .official-motto {
+      font-size: 13px;
+      font-weight: 600;
+      color: #757786;
+      letter-spacing: 0.02em;
+      margin-top: 6px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .inst-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .inst-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .inst-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #2b3035;
+      letter-spacing: 0.01em;
+    }
+
+    .inst-phone-group {
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1px solid #d7d8da;
+      border-radius: 8px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      overflow: hidden;
+    }
+    .inst-phone-group:focus-within {
+      border-color: #F86030;
+      box-shadow: 0 0 0 3px rgba(248, 96, 48, 0.15);
+    }
+    .inst-phone-prefix {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      height: 44px;
+      background: #F8FAFC;
+      border-right: 1px solid #E2E8F0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1D1C41;
+      user-select: none;
+    }
+    .inst-phone-prefix span.flag-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: #495057;
+      background: #E9ECEF;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .inst-phone-input {
+      flex: 1;
+      height: 44px;
+      padding: 0 14px;
+      font-size: 14.5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #161719;
+      background: transparent;
+      border: none;
+      outline: none;
+      letter-spacing: 0.05em;
+    }
+    .inst-phone-input::placeholder {
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      font-weight: 400;
+      color: #adb5bd;
+      letter-spacing: normal;
+    }
+
+    .inst-otp-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      font-size: 22px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-align: center;
+      color: #1D1C41;
+      background: #FFFFFF;
+      border: 1px solid #d7d8da;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .inst-otp-input:focus {
+      border-color: #F86030;
+      box-shadow: 0 0 0 3px rgba(248, 96, 48, 0.15);
+    }
+    .inst-otp-input::placeholder {
+      color: #ced4da;
+      letter-spacing: 0.25em;
+      font-size: 18px;
+    }
+
+    .otp-info-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+    .otp-info-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: #757786;
+      font-weight: 500;
+    }
+    .otp-timer-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #1D1C41;
+      background: #EDF2F7;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .otp-target-phone {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1D1C41;
+    }
+
+    .inst-btn-submit {
+      width: 100%;
+      height: 46px;
+      margin-top: 4px;
+      background: #F86030;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+    .inst-btn-submit:hover {
+      background: #ED762F;
+    }
+    .inst-btn-submit:active {
+      transform: scale(0.99);
+    }
+    .inst-btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .otp-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .btn-link {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4080E0;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.15s ease;
+    }
+    .btn-link:hover {
+      color: #1D1C41;
+    }
+    .btn-link:disabled {
+      color: #94A3B8;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    .inst-alert-box {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #FFF5F5;
+      border: 1px solid #FED7D7;
+      border-radius: 8px;
+      color: #C53030;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+    .inst-alert-box.is-visible {
+      display: flex;
+    }
+
+    .inst-card-footer {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #f1f3f5;
+      text-align: center;
+      font-size: 11.5px;
+      color: #757786;
+      line-height: 1.5;
+    }
+
+    .password-fallback-toggle {
+      margin-top: 14px;
+      text-align: center;
+    }
+    .password-fallback-toggle a {
+      font-size: 12px;
+      color: #757786;
+      text-decoration: none;
+      border-bottom: 1px dashed #CBD5E1;
+      padding-bottom: 1px;
+    }
+    .password-fallback-toggle a:hover {
+      color: #1D1C41;
+    }
+
+    @media (max-width: 600px) {
+      .login-fixed-brand {
+        top: 16px;
+        left: 16px;
+      }
+      .login-fixed-brand img {
+        height: 26px;
+      }
+      .institutional-login-card {
+        padding: 28px 20px;
+      }
+    }
+  </style>
 </head>
-<body class="login-body">
+<body class="institutional-login-body">
 
-  <aside class="login-story">
-    <div class="login-brand">
-      <span class="brand-mark">SX</span>
-      <span class="login-brand-text">
-        <strong>SubsidyX</strong>
-        <span>In-house command center</span>
-      </span>
-    </div>
+  <a href="/login" class="login-fixed-brand" title="SubsidyX Institutional Portal">
+    <img src="/static/img/logo-mark.png" alt="SubsidyX" style="height:32px; width:32px; object-fit:contain; display:block;">
+  </a>
 
-    <div class="login-hero">
-      <span class="kicker">● HNI WhatsApp desk · Gujarat</span>
-      <h1>Every HNI conversation,<br><em>one accountable ledger.</em></h1>
-      <p>
-        A private operations console for Admins, Chartered Accountants and Relationship Managers.
-        Import mobile contact books, run segmented WhatsApp campaigns, automate first replies and audit
-        every sign-in — with zero client-facing login.
-      </p>
-
-      <div class="login-metrics">
-        <div class="login-metric">
-          <div class="k">Modules</div>
-          <div class="v is-accent">06</div>
+  <div class="institutional-login-wrapper">
+    <div class="institutional-login-card">
+      <div class="institutional-card-header">
+        <div class="brand-mark-lockup">
+          <img src="/static/img/logo-mark.png" alt="SubsidyX" style="height:38px; width:38px; object-fit:contain; border-radius:6px;">
         </div>
-        <div class="login-metric">
-          <div class="k">Access roles</div>
-          <div class="v">Admin · Staff</div>
-        </div>
-        <div class="login-metric">
-          <div class="k">Audit</div>
-          <div class="v">IP + Device</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="login-story-foot">
-      <span>SubsidyX Advisory</span>
-      <span class="dot-sep"></span>
-      <span>Ahmedabad · Surat · Rajkot</span>
-      <span class="dot-sep"></span>
-      <span>Internal use only</span>
-    </div>
-  </aside>
-
-  <main class="login-panel">
-    <div class="login-card">
-      <div class="login-card-head">
-        <span class="eyebrow-dark">Authorised staff only</span>
-        <h2>Sign in to the console</h2>
-        <p>Your role is detected automatically by the server, so the right modules unlock the moment you sign in.</p>
+        <div class="official-motto">One-Stop Subsidy Market Place</div>
       </div>
 
-      <form class="login-form" id="loginForm" autocomplete="on" novalidate>
-        <div class="login-error" id="loginError" role="alert">
-          <span aria-hidden="true">⚠</span>
-          <span id="loginErrorText">Invalid Employee ID or password.</span>
-        </div>
+      <div class="inst-alert-box" id="loginError" role="alert">
+        <svg style="width:16px; height:16px; min-width:16px; stroke:#C53030; margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="loginErrorText">Access denied.</span>
+      </div>
 
-        <div class="field">
-          <label for="username">Employee ID</label>
-          <input class="input mono-input" id="username" name="username" type="text" placeholder="e.g. nisarg" autocomplete="username" required autofocus>
-        </div>
-
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="password-wrap">
-            <input class="input" id="password" name="password" type="password" placeholder="••••••••••" autocomplete="current-password" required>
-            <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password" aria-pressed="false">👁</button>
+      <!-- STEP 1: MOBILE NUMBER ENTRY -->
+      <form class="inst-form" id="step1Form" autocomplete="on" novalidate>
+        <div class="inst-field">
+          <label class="inst-label" for="phoneNumber">Registered Mobile Number</label>
+          <div class="inst-phone-group">
+            <div class="inst-phone-prefix">
+              <span class="flag-tag">IN</span>
+              <span>+91</span>
+            </div>
+            <input
+              class="inst-phone-input"
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="10"
+              required
+              placeholder="Enter 10-digit mobile number"
+              autofocus
+            >
           </div>
         </div>
 
-        <button class="btn btn-primary btn-block login-submit" id="loginSubmit" type="submit">Sign in securely →</button>
+        <button class="inst-btn-submit" id="btnRequestOtp" type="submit">
+          <span>Request Secure OTP</span>
+        </button>
       </form>
 
-      <div class="login-hint">
-        <div class="k">🔐 Seeded Super Admin logins</div>
-        <div class="hint-row"><span class="who">Nisarg Parsaniya</span><span class="mono">nisarg</span><span class="role">ADMIN</span></div>
-        <div class="hint-row"><span class="who">Gajendra Jain</span><span class="mono">gajendra</span><span class="role">ADMIN</span></div>
-        <div class="hint-row"><span class="who">CA Abhishek Jain</span><span class="mono">abhishek</span><span class="role">ADMIN</span></div>
-        <div class="hint-row"><span class="who">Rahul Desai</span><span class="mono">emp_rahul</span><span class="role is-emp">EMPLOYEE</span></div>
-        <div class="field-hint" style="margin-top:6px">Passwords: <span class="mono">Nisarg@2026</span>, <span class="mono">Gajendra@2026</span>, <span class="mono">Abhishek@2026</span>, <span class="mono">Rahul@2026</span>.</div>
+      <!-- STEP 2: 6-DIGIT OTP VERIFICATION -->
+      <form class="inst-form" id="step2Form" style="display: none;" autocomplete="off" novalidate>
+        <div class="otp-info-card">
+          <div class="otp-info-header">
+            <span>Security code sent via SMS</span>
+            <span class="otp-timer-badge" id="countdownTimer">02:00</span>
+          </div>
+          <div class="otp-target-phone" id="displayMaskedPhone">+91 ••••••XXXX</div>
+        </div>
+
+        <div class="inst-field">
+          <label class="inst-label" for="otpCode">Enter 6-Digit OTP</label>
+          <input
+            class="inst-otp-input"
+            id="otpCode"
+            name="otpCode"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            autocomplete="one-time-code"
+            required
+            placeholder="······"
+          >
+        </div>
+
+        <button class="inst-btn-submit" id="btnVerifyOtp" type="submit">
+          <span>Verify &amp; Sign In</span>
+        </button>
+
+        <div class="otp-actions-row">
+          <button class="btn-link" id="btnResendOtp" type="button" disabled>Resend Code (30s)</button>
+          <button class="btn-link" id="btnChangePhone" type="button">Change Mobile Number</button>
+        </div>
+      </form>
+
+      <!-- EMERGENCY USER ID & PASSWORD FALLBACK (FOR DIRECT CONSOLE MAINTENANCE) -->
+      <div id="passwordFallbackBlock" style="display: none; margin-top: 18px;">
+        <form class="inst-form" id="pwdForm" novalidate>
+          <div class="inst-field">
+            <label class="inst-label" for="pwdUsername">User ID</label>
+            <input class="inst-phone-input" id="pwdUsername" style="border:1px solid #d7d8da; border-radius:8px; padding:0 12px; font-family:inherit; font-size:14px;" type="text" placeholder="e.g. name">
+          </div>
+          <div class="inst-field">
+            <label class="inst-label" for="pwdPassword">Password</label>
+            <input class="inst-phone-input" id="pwdPassword" style="border:1px solid #d7d8da; border-radius:8px; padding:0 12px; font-family:inherit; font-size:14px;" type="password" placeholder="Enter password">
+          </div>
+          <button class="inst-btn-submit" id="btnPwdSubmit" type="submit">
+            <span>Sign In with Password</span>
+          </button>
+        </form>
       </div>
 
-      <p class="login-foot-note">
-        HNI clients never access this dashboard. Five failed attempts lock the originating IP for 15 minutes,
-        and every attempt — successful or not — is written to the login audit trail.
-      </p>
+      <div class="password-fallback-toggle">
+        <a href="#toggle-password" id="togglePasswordMode">Use password sign-in instead</a>
+      </div>
+
+      <div class="inst-card-footer">
+        Confidential Internal Advisory Portal · Authorized Staff Only
+      </div>
     </div>
-  </main>
+  </div>
 
   <script>
     (function () {
       'use strict';
 
-      var form = document.getElementById('loginForm');
+      var step1Form = document.getElementById('step1Form');
+      var step2Form = document.getElementById('step2Form');
+      var phoneInput = document.getElementById('phoneNumber');
+      var otpInput = document.getElementById('otpCode');
+      var btnRequestOtp = document.getElementById('btnRequestOtp');
+      var btnVerifyOtp = document.getElementById('btnVerifyOtp');
+      var btnResendOtp = document.getElementById('btnResendOtp');
+      var btnChangePhone = document.getElementById('btnChangePhone');
       var errorBox = document.getElementById('loginError');
       var errorText = document.getElementById('loginErrorText');
-      var submit = document.getElementById('loginSubmit');
-      var usernameInput = document.getElementById('username');
-      var passwordInput = document.getElementById('password');
-      var toggle = document.getElementById('passwordToggle');
+      var displayMaskedPhone = document.getElementById('displayMaskedPhone');
+      var countdownTimer = document.getElementById('countdownTimer');
 
-      function showError(message) {
-        errorText.textContent = message;
+      var pwdFallbackBlock = document.getElementById('passwordFallbackBlock');
+      var togglePasswordMode = document.getElementById('togglePasswordMode');
+      var pwdForm = document.getElementById('pwdForm');
+      var pwdUsername = document.getElementById('pwdUsername');
+      var pwdPassword = document.getElementById('pwdPassword');
+      var btnPwdSubmit = document.getElementById('btnPwdSubmit');
+
+      var currentChallengeToken = '';
+      var currentPhone = '';
+      var countdownInterval = null;
+      var resendCooldownInterval = null;
+      var remainingSeconds = 120;
+
+      function showError(msg) {
+        errorText.textContent = msg;
         errorBox.classList.add('is-visible');
       }
 
@@ -122,75 +498,275 @@
         errorBox.classList.remove('is-visible');
       }
 
-      toggle.addEventListener('click', function () {
-        var revealed = passwordInput.type === 'text';
-        passwordInput.type = revealed ? 'password' : 'text';
-        toggle.textContent = revealed ? '👁' : '🙈';
-        toggle.setAttribute('aria-pressed', revealed ? 'false' : 'true');
-        toggle.setAttribute('aria-label', revealed ? 'Show password' : 'Hide password');
+      phoneInput.addEventListener('input', function () {
+        clearError();
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
       });
 
-      [usernameInput, passwordInput].forEach(function (input) {
-        input.addEventListener('input', clearError);
+      otpInput.addEventListener('input', function () {
+        clearError();
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+        if (this.value.length === 6) {
+          step2Form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
       });
 
-      // Already signed in? Skip the login screen.
-      fetch('/api/auth/me', { credentials: 'same-origin' })
-        .then(function (response) {
-          if (response.ok) window.location.replace('/dashboard');
-        })
-        .catch(function () {});
+      function startCountdown(totalSecs) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        remainingSeconds = totalSecs || 120;
+        var maxSecs = remainingSeconds;
 
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
+        function update() {
+          var m = Math.floor(remainingSeconds / 60);
+          var s = remainingSeconds % 60;
+          var timeStr = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+          countdownTimer.textContent = timeStr;
+          if (remainingSeconds <= 0) {
+            clearInterval(countdownInterval);
+            countdownTimer.textContent = 'Expired';
+            showError('OTP has expired. Please request a new code.');
+          }
+          remainingSeconds--;
+        }
+        update();
+        countdownInterval = setInterval(update, 1000);
+      }
+
+      function startResendCooldown(seconds) {
+        if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+        btnResendOtp.disabled = true;
+        var s = seconds;
+
+        function update() {
+          btnResendOtp.textContent = 'Resend Code (' + s + 's)';
+          if (s <= 0) {
+            clearInterval(resendCooldownInterval);
+            btnResendOtp.disabled = false;
+            btnResendOtp.textContent = 'Resend Code';
+          }
+          s--;
+        }
+        update();
+        resendCooldownInterval = setInterval(update, 1000);
+      }
+
+      // Step 1: Request OTP
+      step1Form.addEventListener('submit', function (e) {
+        e.preventDefault();
         clearError();
 
-        var username = usernameInput.value.trim();
-        var password = passwordInput.value;
-
-        if (!username || !password) {
-          showError('Enter your Employee ID and password to continue.');
+        var val = phoneInput.value.trim();
+        if (val.length !== 10 || !/^[6-9]\d{9}$/.test(val)) {
+          showError('Please enter a valid 10-digit Indian mobile number (starting with 6-9).');
+          phoneInput.focus();
           return;
         }
 
-        submit.disabled = true;
-        submit.textContent = 'Verifying credentials…';
+        btnRequestOtp.disabled = true;
+        btnRequestOtp.innerHTML = '<span>Requesting Secure OTP\u2026</span>';
+
+        fetch('/api/auth/request-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_number: val })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
+            });
+          })
+          .then(function (res) {
+            btnRequestOtp.disabled = false;
+            btnRequestOtp.innerHTML = '<span>Request Secure OTP</span>';
+
+            if (!res.ok) {
+              var msg = res.data && res.data.detail ? res.data.detail : 'Could not request OTP. Try again.';
+              showError(msg);
+              return;
+            }
+
+            // Transition to Step 2
+            currentChallengeToken = res.data.challenge_token;
+            currentPhone = val;
+            displayMaskedPhone.textContent = res.data.masked_phone || ('+91 ••••••' + val.slice(-4));
+            
+            step1Form.style.display = 'none';
+            step2Form.style.display = 'flex';
+            step2Form.reset();
+            otpInput.focus();
+
+            startCountdown(res.data.expires_in_seconds || 120);
+            startResendCooldown(30);
+
+
+          })
+          .catch(function () {
+            btnRequestOtp.disabled = false;
+            btnRequestOtp.innerHTML = '<span>Request Secure OTP</span>';
+            showError('Network error. Could not connect to authentication gateway.');
+          });
+      });
+
+      // Step 2: Verify OTP
+      step2Form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearError();
+
+        var otpVal = otpInput.value.trim();
+        if (otpVal.length !== 6) {
+          showError('Enter the complete 6-digit verification code.');
+          otpInput.focus();
+          return;
+        }
+
+        btnVerifyOtp.disabled = true;
+        btnVerifyOtp.innerHTML = '<span>Verifying Security Code\u2026</span>';
+
+        fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone_number: currentPhone,
+            challenge_token: currentChallengeToken,
+            otp_code: otpVal
+          })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
+            });
+          })
+          .then(function (res) {
+            if (res.ok) {
+              btnVerifyOtp.innerHTML = '<span>Authorized \u2014 opening console\u2026</span>';
+              if (countdownInterval) clearInterval(countdownInterval);
+              window.location.replace('/dashboard');
+              return;
+            }
+
+            btnVerifyOtp.disabled = false;
+            btnVerifyOtp.innerHTML = '<span>Verify &amp; Sign In</span>';
+            var msg = res.data && res.data.detail ? res.data.detail : 'Verification failed.';
+            showError(msg);
+            step2Form.reset();
+            otpInput.focus();
+          })
+          .catch(function () {
+            btnVerifyOtp.disabled = false;
+            btnVerifyOtp.innerHTML = '<span>Verify &amp; Sign In</span>';
+            showError('Network error during verification. Please try again.');
+          });
+      });
+
+      // Resend OTP
+      btnResendOtp.addEventListener('click', function () {
+        if (!currentPhone) return;
+        clearError();
+        btnResendOtp.disabled = true;
+        btnResendOtp.textContent = 'Resending\u2026';
+
+        fetch('/api/auth/request-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_number: currentPhone })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
+            });
+          })
+          .then(function (res) {
+            if (!res.ok) {
+              showError(res.data && res.data.detail ? res.data.detail : 'Could not resend OTP.');
+              startResendCooldown(15);
+              return;
+            }
+            currentChallengeToken = res.data.challenge_token;
+            startCountdown(res.data.expires_in_seconds || 120);
+            startResendCooldown(30);
+            step2Form.reset();
+            otpInput.focus();
+          })
+          .catch(function () {
+            startResendCooldown(15);
+            showError('Network error while resending OTP.');
+          });
+      });
+
+      // Change phone button
+      btnChangePhone.addEventListener('click', function () {
+        if (countdownInterval) clearInterval(countdownInterval);
+        if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+        clearError();
+        step2Form.style.display = 'none';
+        step1Form.style.display = 'flex';
+        phoneInput.focus();
+      });
+
+      // Password Fallback Mode Toggle
+      togglePasswordMode.addEventListener('click', function (e) {
+        e.preventDefault();
+        clearError();
+        var isPwdVisible = pwdFallbackBlock.style.display !== 'none';
+        if (isPwdVisible) {
+          pwdFallbackBlock.style.display = 'none';
+          step1Form.style.display = 'flex';
+          togglePasswordMode.textContent = 'Use password sign-in instead';
+        } else {
+          pwdFallbackBlock.style.display = 'block';
+          step1Form.style.display = 'none';
+          step2Form.style.display = 'none';
+          togglePasswordMode.textContent = 'Back to Mobile OTP sign-in';
+          pwdUsername.focus();
+        }
+      });
+
+      // Password Login Submit
+      pwdForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearError();
+        var u = pwdUsername.value.trim();
+        var p = pwdPassword.value;
+        if (!u || !p) {
+          showError('Enter your User ID and password.');
+          return;
+        }
+        btnPwdSubmit.disabled = true;
+        btnPwdSubmit.innerHTML = '<span>Verifying credentials\u2026</span>';
 
         fetch('/api/auth/login', {
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username, password: password })
+          body: JSON.stringify({ username: u, password: p })
         })
-          .then(function (response) {
-            return response.json().catch(function () {
-              return {};
-            }).then(function (payload) {
-              return { ok: response.ok, status: response.status, payload: payload };
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
             });
           })
-          .then(function (result) {
-            if (result.ok) {
-              submit.textContent = 'Access granted — opening console…';
+          .then(function (res) {
+            if (res.ok) {
+              btnPwdSubmit.innerHTML = '<span>Opening console\u2026</span>';
               window.location.replace('/dashboard');
               return;
             }
-            var message = result.payload && result.payload.detail ? result.payload.detail : 'Sign-in failed. Please try again.';
-            if (Array.isArray(message)) {
-              message = message.map(function (item) { return item.msg; }).join(' · ');
-            }
-            showError(message);
-            passwordInput.value = '';
-            passwordInput.focus();
-            submit.disabled = false;
-            submit.textContent = 'Sign in securely →';
+            btnPwdSubmit.disabled = false;
+            btnPwdSubmit.innerHTML = '<span>Sign In with Password</span>';
+            showError(res.data && res.data.detail ? res.data.detail : 'Sign-in failed.');
           })
           .catch(function () {
-            showError('Could not reach the server. Check your connection and try again.');
-            submit.disabled = false;
-            submit.textContent = 'Sign in securely →';
+            btnPwdSubmit.disabled = false;
+            btnPwdSubmit.innerHTML = '<span>Sign In with Password</span>';
+            showError('Network error. Check connection.');
           });
       });
+
+      // Already logged in check
+      fetch('/api/auth/me', { credentials: 'same-origin' })
+        .then(function (r) { if (r.ok) window.location.replace('/dashboard'); })
+        .catch(function () {});
     })();
   </script>
 </body>
